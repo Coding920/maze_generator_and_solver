@@ -19,13 +19,26 @@ class Line:
 
 
 class Cell:
-    def __init__(self, point1, point2):
+    def __init__(self, point1, point2, walls="tblr"):
+        """ For walls, t = top, b bottom, l left, and r right """
         self.x1, self.y1 = point1.x, point1.y
         self.x2, self.y2 = point2.x, point2.y
-        self.has_top = True
-        self.has_bottom = True
-        self.has_left = True
-        self.has_right = True
+        if "t" in walls:
+            self.has_top = True
+        else:
+            self.has_top = False
+        if "b" in walls:
+            self.has_bottom = True
+        else:
+            self.has_bottom = False
+        if "l" in walls:
+            self.has_left = True
+        else:
+            self.has_left = False
+        if "r" in walls:
+            self.has_right = True
+        else:
+            self.has_right = False
 
     def draw(self, canvas: Canvas):
         if self.has_top:
