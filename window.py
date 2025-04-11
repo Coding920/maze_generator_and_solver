@@ -1,5 +1,5 @@
 from tkinter import Tk, BOTH, Canvas
-from data import Line
+from drawed import Line, Cell
 
 
 class Window:
@@ -7,9 +7,9 @@ class Window:
         self.root = Tk()
         self.root.title("Maze Game")
         self.root.geometry(f"{width}x{height}")
-        self.canvas = Canvas(self.root)
+        self.canvas = Canvas(self.root, height=height, width=width)
 
-        self.canvas.grid(row=0, column=0)
+        self.canvas.grid()
 
         self.is_running = False
         self.root.protocol("WM_DELETE_WINDOW", self.close)
@@ -28,3 +28,6 @@ class Window:
 
     def draw_line(self, line: Line, fill_color):
         line.draw(self.canvas, fill_color=fill_color)
+
+    def draw_cell(self, cell: Cell):
+        cell.draw(self.canvas)
