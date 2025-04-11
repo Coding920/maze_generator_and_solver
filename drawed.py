@@ -14,14 +14,14 @@ class Line:
 
     def draw(self, canvas: Canvas, fill_color):
         canvas.create_line(
-            self.point1.x, self.point1.y, self.point2.x, self.point2.y, fill=fill_color, width=2
+            self.point1.x, self.point1.y, self.point2.x, self.point2.y, fill=fill_color, width=3
         )
 
 
 class Cell:
-    def __init__(self, coordinates: tuple[Point, Point]):
-        self.x1, self.y1 = coordinates[0].x, coordinates[0].y
-        self.x2, self.y2 = coordinates[1].x, coordinates[1].y
+    def __init__(self, point1, point2):
+        self.x1, self.y1 = point1.x, point1.y
+        self.x2, self.y2 = point2.x, point2.y
         self.has_top = True
         self.has_bottom = True
         self.has_left = True
@@ -44,3 +44,15 @@ class Cell:
             canvas.create_line(
                 self.x2, self.y1, self.x2, self.y2, fill="black", width=2
             )
+
+    def draw_move(self, canvas: Canvas, to_cell, undo=False):
+        if undo:
+            fill = "gray"
+        else:
+            fill = "red"
+
+        self_center = Point((self.x1 + self.x2) / 2, (self.y1 + self.y2) / 2)
+        cell_center = Point((to_cell.x1 + to_cell.x2) / 2,
+                            (to_cell.y1 + to_cell.y2) / 2)
+        canvas.create_line(self_center.x, self_center.y,
+                           cell_center.x, cell_center.y, fill=fill, width=3)

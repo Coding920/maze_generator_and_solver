@@ -31,3 +31,6 @@ class Window:
 
     def draw_cell(self, cell: Cell):
         cell.draw(self.canvas)
+
+    def draw_move(self, cell1: Cell, cell2: Cell, undo=False):
+        cell1.draw_move(self.canvas, cell2, undo)
