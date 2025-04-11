@@ -88,7 +88,7 @@ class Maze:
             elif len(to_visit) - 1 == 0:
                 rand = 0
             else:
-                rand = random.randrange(len(to_visit) - 1)
+                rand = random.randrange(len(to_visit))
 
             new_i, new_j = self.break_cell_wall(
                 self.cells[i][j], to_visit[rand], i, j)
