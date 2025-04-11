@@ -14,7 +14,7 @@ class Maze:
             cell_size_x,
             cell_size_y,
             win: Window = None,
-            seed=None
+            seed=True
     ):
         self.x = x
         self.y = y
@@ -24,13 +24,11 @@ class Maze:
         self.cell_size_y = cell_size_y
         self.win = win
         self.sleep_seconds = 0.1
+        if seed:
+            random.seed(1, version=2)
         self.create_cells()
         self.break_walls_r(0, 0)
         self.break_entrance_and_exit()
-        if seed:
-            self.rand = random.seed(seed)
-        else:
-            self.rand = 0
 
     def create_cells(self):
         self.cells = []

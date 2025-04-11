@@ -1,5 +1,4 @@
 from window import Window
-from drawed import Point, Line, Cell
 from maze import Maze
 
 
