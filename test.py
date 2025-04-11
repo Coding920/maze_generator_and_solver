@@ -38,6 +38,31 @@ class Test(unittest.TestCase):
             num_rows
         )
 
+    def test_break_enter_and_exit(self):
+        m1 = Maze(0, 0, 1, 90, 10, 10)
+        self.assertTrue(
+            m1.cells[0][0].has_left is False
+            and m1.cells[-1][-1].has_right is False
+        )
+
+        m1 = Maze(0, 0, 90, 1, 10, 10)
+        self.assertTrue(
+            m1.cells[0][0].has_left is False
+            and m1.cells[-1][-1].has_right is False
+        )
+
+        m1 = Maze(0, 0, 1, 1, 10, 10)
+        self.assertTrue(
+            m1.cells[0][0].has_left is False
+            and m1.cells[-1][-1].has_right is False
+        )
+
+        m1 = Maze(0, 0, 100, 100, 10, 10)
+        self.assertTrue(
+            m1.cells[0][0].has_left is False
+            and m1.cells[-1][-1].has_right is False
+        )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

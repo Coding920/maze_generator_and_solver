@@ -46,17 +46,33 @@ class Cell:
             canvas.create_line(
                 self.x1, self.y1, self.x2, self.y1, fill="black", width=2
             )
+        else:
+            canvas.create_line(
+                self.x1, self.y1, self.x2, self.y1, fill="white", width=2
+            )
         if self.has_bottom:
             canvas.create_line(
                 self.x1, self.y2, self.x2, self.y2, fill="black", width=2
+            )
+        else:
+            canvas.create_line(
+                self.x1, self.y2, self.x2, self.y2, fill="white", width=2
             )
         if self.has_left:
             canvas.create_line(
                 self.x1, self.y1, self.x1, self.y2, fill="black", width=2
             )
+        else:
+            canvas.create_line(
+                self.x1, self.y1, self.x1, self.y2, fill="white", width=2
+            )
         if self.has_right:
             canvas.create_line(
                 self.x2, self.y1, self.x2, self.y2, fill="black", width=2
+            )
+        else:
+            canvas.create_line(
+                self.x2, self.y1, self.x2, self.y2, fill="white", width=2
             )
 
     def draw_move(self, canvas: Canvas, to_cell, undo=False):
