@@ -24,6 +24,7 @@ class Cell:
         """ For walls, t = top, b bottom, l left, and r right """
         self.x1, self.y1 = point1.x, point1.y
         self.x2, self.y2 = point2.x, point2.y
+
         if "t" in walls:
             self.has_top = True
         else:
@@ -40,6 +41,8 @@ class Cell:
             self.has_right = True
         else:
             self.has_right = False
+
+        self.visited = False
 
     def draw(self, canvas: Canvas):
         if self.has_top:
