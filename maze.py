@@ -34,6 +34,7 @@ class Maze:
                 self.break_walls_r(
                     coord[0], coord[1])
         self.break_entrance_and_exit()
+        self.reset_visited()
 
     def create_cells(self):
         self.cells = []
@@ -56,6 +57,11 @@ class Maze:
     def animate(self):
         self.win.redraw()
         time.sleep(0.01)
+
+    def reset_visited(self):
+        for cell_list in self.cells:
+            for cell in cell_list:
+                cell.visited = False
 
     def break_entrance_and_exit(self):
         self.cells[0][0].has_left = False
