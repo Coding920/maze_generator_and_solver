@@ -23,11 +23,16 @@ class Maze:
         self.cell_size_x = cell_size_x
         self.cell_size_y = cell_size_y
         self.win = win
-        self.sleep_seconds = 0.1
+        self.abandoned_cells = []
         if seed:
             random.seed(1, version=2)
+
         self.create_cells()
         self.break_walls_r(0, 0)
+        if self.abandoned_cells:
+            for coord in self.abandoned_cells:
+                self.break_walls_r(
+                    coord[0], coord[1])
         self.break_entrance_and_exit()
 
     def create_cells(self):
@@ -50,7 +55,7 @@ class Maze:
 
     def animate(self):
         self.win.redraw()
-        time.sleep(self.sleep_seconds)
+        # time.sleep(0.001)
 
     def break_entrance_and_exit(self):
         self.cells[0][0].has_left = False
@@ -59,27 +64,26 @@ class Maze:
             self.win.draw_cell(self.cells[0][0])
             self.win.draw_cell(self.cells[-1][-1])
 
-    def break_walls_r(self, i, j):
+    def break_walls_r(self, i, j, depth=0):
+        deep_return = False
+        if depth > 800:  # Don't let it recurse too deep
+            deep_return = True
         self.cells[i][j].visited = True
 
         while True:
             to_visit = []
 
-            if i > 0:
-                if not self.cells[i - 1][j].visited:
-                    to_visit.append(self.cells[i - 1][j])
+            if i > 0 and not self.cells[i - 1][j].visited:
+                to_visit.append((i - 1, j))
 
-            if j > 0:
-                if not self.cells[i][j - 1].visited:
-                    to_visit.append(self.cells[i][j - 1])
+            if j > 0 and not self.cells[i][j - 1].visited:
+                to_visit.append((i, j - 1))
 
-            if i < len(self.cells) - 1:
-                if not self.cells[i + 1][j].visited:
-                    to_visit.append(self.cells[i + 1][j])
+            if i < len(self.cells) - 1 and not self.cells[i + 1][j].visited:
+                to_visit.append((i + 1, j))
 
-            if j < len(self.cells[0]) - 1:
-                if not self.cells[i][j + 1].visited:
-                    to_visit.append(self.cells[i][j + 1])
+            if j < len(self.cells[0]) - 1 and not self.cells[i][j + 1].visited:
+                to_visit.append((i, j + 1))
 
             if not to_visit:
                 return
@@ -88,44 +92,49 @@ class Maze:
             else:
                 rand = random.randrange(len(to_visit))
 
-            new_i, new_j = self.break_cell_wall(
-                self.cells[i][j], to_visit[rand], i, j)
+            if deep_return:
+                self.abandoned_cells.append((i, j))
+                return
 
-            self.break_walls_r(new_i, new_j)
+            new_i, new_j = self.break_cell_wall(
+                self.cells[i][j],
+                self.cells[to_visit[rand][0]][to_visit[rand][1]], i, j)
+
+            self.break_walls_r(new_i, new_j, depth + 1)
 
     def break_cell_wall(self, current_cell: Cell, other_cell: Cell, i, j):
-        if i < len(self.cells) - 1:
-            if other_cell == self.cells[i + 1][j]:
-                current_cell.has_right = False
-                other_cell.has_left = False
+        if i < len(self.cells) - 1 and other_cell == self.cells[i + 1][j]:
+            current_cell.has_right = False
+            other_cell.has_left = False
+            if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
                 self.animate()
-                return i + 1, j
+            return i + 1, j
 
-        if j < len(self.cells[i]) - 1:
-            if other_cell == self.cells[i][j + 1]:
-                current_cell.has_bottom = False
-                other_cell.has_top = False
+        if j < len(self.cells[i]) - 1 and other_cell == self.cells[i][j + 1]:
+            current_cell.has_bottom = False
+            other_cell.has_top = False
+            if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
                 self.animate()
-                return i, j + 1
+            return i, j + 1
 
-        if i > 0:
-            if other_cell == self.cells[i - 1][j]:
-                current_cell.has_left = False
-                other_cell.has_right = False
+        if i > 0 and other_cell == self.cells[i - 1][j]:
+            current_cell.has_left = False
+            other_cell.has_right = False
+            if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
                 self.animate()
-                return i - 1, j
+            return i - 1, j
 
-        if j > 0:
-            if other_cell == self.cells[i][j - 1]:
-                current_cell.has_top = False
-                other_cell.has_bottom = False
+        if j > 0 and other_cell == self.cells[i][j - 1]:
+            current_cell.has_top = False
+            other_cell.has_bottom = False
+            if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
                 self.animate()
-                return i, j - 1
+            return i, j - 1
