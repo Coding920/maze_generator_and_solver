@@ -6,10 +6,9 @@ def main():
     win = Window(800, 800)
     maze = Maze(
         5, 5,
-        100, 100,
-        5, 5,
+        20, 20,
+        35, 35,
         win)
-    print("!")
     win.wait_to_close()
 
 
