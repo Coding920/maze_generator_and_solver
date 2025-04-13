@@ -1,4 +1,5 @@
-from tkinter import Tk, BOTH, Canvas
+from tkinter import ttk, Tk, Canvas
+import tkinter as tk
 from drawed import Line, Cell
 
 
@@ -7,12 +8,31 @@ class Window:
         self.root = Tk()
         self.root.title("Maze Game")
         self.root.geometry(f"{width}x{height}")
-        self.canvas = Canvas(self.root, height=height, width=width)
+        self.frame = ttk.Frame(self.root)
+        self.canvas = Canvas(self.frame, height=height, width=width)
+        self.control_frame = ttk.Frame(self.root, relief=tk.RAISED)
+        self.break_walls = ttk.Button(self.control_frame, text="Break Walls")
+        self.start_solve = ttk.Button(
+            self.control_frame, text="Solve with algorithm")
 
-        self.canvas.grid()
+        self.root.rowconfigure(0, weight=1)
+        self.root.columnconfigure(0, weight=1)
+        self.frame.grid(column=0, row=0)
+        self.canvas.grid(stick=tk.NSEW)
+        self.control_frame.grid(column=0, row=1)
+        self.break_walls.grid(column=0, row=0)
+        self.start_solve.grid(column=1, row=0)
 
         self.is_running = False
         self.root.protocol("WM_DELETE_WINDOW", self.close)
+
+    def set_break_walls_func(self, func):
+        self.break_walls.configure(command=func)
+        self.break_walls.update()
+
+    def set_solve_func(self, func):
+        self.start_solve.configure(command=func)
+        self.start_solve.update()
 
     def redraw(self):
         self.root.update_idletasks()

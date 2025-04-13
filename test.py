@@ -40,35 +40,36 @@ class Test(unittest.TestCase):
 
     def test_break_enter_and_exit(self):
         m1 = Maze(0, 0, 1, 90, 10, 10)
-        self.assertTrue(
-            m1.cells[0][0].has_left is False
-            and m1.cells[-1][-1].has_right is False
+        m1._break_entrance_and_exit()
+        self.assertFalse(
+            m1.cells[0][0].has_left
+            or m1.cells[-1][-1].has_right
         )
 
         m1 = Maze(0, 0, 90, 1, 10, 10)
-        self.assertTrue(
-            m1.cells[0][0].has_left is False
-            and m1.cells[-1][-1].has_right is False
+        m1._break_entrance_and_exit()
+        self.assertFalse(
+            m1.cells[0][0].has_left
+            or m1.cells[-1][-1].has_right
         )
 
         m1 = Maze(0, 0, 1, 1, 10, 10)
-        self.assertTrue(
-            m1.cells[0][0].has_left is False
-            and m1.cells[-1][-1].has_right is False
+        m1._break_entrance_and_exit()
+        self.assertFalse(
+            m1.cells[0][0].has_left
+            or m1.cells[-1][-1].has_right
         )
 
         m1 = Maze(0, 0, 100, 100, 10, 10)
-        self.assertTrue(
-            m1.cells[0][0].has_left is False
-            and m1.cells[-1][-1].has_right is False
+        m1._break_entrance_and_exit()
+        self.assertFalse(
+            m1.cells[0][0].has_left
+            or m1.cells[-1][-1].has_right
         )
 
     def test_break_walls_r(self):
         m1 = Maze(0, 0, 100, 100, 10, 10)
-        m1.break_walls_r(0, 0)
-        if m1.abandoned_cells:
-            for coord in m1.abandoned_cells:
-                m1.break_walls_r(coord[0], coord[1])
+        m1.break_walls()
         for row in m1.cells:
             for cell in row:
                 self.assertTrue(
@@ -80,11 +81,7 @@ class Test(unittest.TestCase):
 
     def test_reset_visited(self):
         m1 = Maze(0, 0, 100, 100, 10, 10)
-        m1.break_walls_r(0, 0)
-        if m1.abandoned_cells:
-            for coord in m1.abandoned_cells:
-                m1.break_walls_r(coord[0], coord[1])
-        m1.reset_visited()
+        m1.break_walls()
         for row in m1.cells:
             for cell in row:
                 self.assertTrue(

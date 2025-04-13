@@ -26,15 +26,10 @@ class Maze:
         self.abandoned_cells = []
         if seed:
             random.seed(1, version=2)
-
         self.create_cells()
-        self.break_walls_r(0, 0)
-        if self.abandoned_cells:
-            for coord in self.abandoned_cells:
-                self.break_walls_r(
-                    coord[0], coord[1])
-        self.break_entrance_and_exit()
-        self.reset_visited()
+        if self.win:
+            self.win.set_break_walls_func(self.break_walls)
+            self.win.set_solve_func(self.solve)
 
     def create_cells(self):
         self.cells = []
@@ -58,19 +53,28 @@ class Maze:
         self.win.redraw()
         time.sleep(0.01)
 
-    def reset_visited(self):
+    def break_walls(self):
+        self._break_walls_r(0, 0)
+        if self.abandoned_cells:
+            for coord in self.abandoned_cells:
+                self._break_walls_r(
+                    coord[0], coord[1])
+        self._break_entrance_and_exit()
+        self._reset_visited()
+
+    def _reset_visited(self):
         for cell_list in self.cells:
             for cell in cell_list:
                 cell.visited = False
 
-    def break_entrance_and_exit(self):
+    def _break_entrance_and_exit(self):
         self.cells[0][0].has_left = False
         self.cells[-1][-1].has_right = False
         if self.win:
             self.win.draw_cell(self.cells[0][0])
             self.win.draw_cell(self.cells[-1][-1])
 
-    def break_walls_r(self, i, j, depth=0):
+    def _break_walls_r(self, i, j, depth=0):
         deep_return = False
         if depth > 800:  # Don't let it recurse too deep
             deep_return = True
@@ -102,13 +106,13 @@ class Maze:
                 self.abandoned_cells.append((i, j))
                 return
 
-            new_i, new_j = self.break_cell_wall(
+            new_i, new_j = self._break_cell_wall(
                 self.cells[i][j],
                 self.cells[to_visit[rand][0]][to_visit[rand][1]], i, j)
 
-            self.break_walls_r(new_i, new_j, depth + 1)
+            self._break_walls_r(new_i, new_j, depth + 1)
 
-    def break_cell_wall(self, current_cell: Cell, other_cell: Cell, i, j):
+    def _break_cell_wall(self, current_cell: Cell, other_cell: Cell, i, j):
         if i < len(self.cells) - 1 and other_cell == self.cells[i + 1][j]:
             current_cell.has_right = False
             other_cell.has_left = False
@@ -144,3 +148,6 @@ class Maze:
                 self.win.draw_cell(other_cell)
                 self.animate()
             return i, j - 1
+
+    def solve(self):
+        pass
