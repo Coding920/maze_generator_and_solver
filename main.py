@@ -8,7 +8,7 @@ def main():
         5, 5,
         20, 20,
         35, 35,
-        win)
+        win, False)
     win.wait_to_close()
 
 

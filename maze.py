@@ -44,14 +44,14 @@ class Maze:
                 cells.append(cell)
                 if self.win:
                     self.win.draw_cell(cell)
-                    self.animate()
+                    self.animate(0.001)
                 y += self.cell_size_y
             x += self.cell_size_x
             self.cells.append(cells)
 
-    def animate(self):
+    def animate(self, sleep_seconds):
         self.win.redraw()
-        time.sleep(0.01)
+        time.sleep(sleep_seconds)
 
     def break_walls(self):
         self._break_walls_r(0, 0)
@@ -113,13 +113,14 @@ class Maze:
             self._break_walls_r(new_i, new_j, depth + 1)
 
     def _break_cell_wall(self, current_cell: Cell, other_cell: Cell, i, j):
+        break_wall_seconds = 0.04
         if i < len(self.cells) - 1 and other_cell == self.cells[i + 1][j]:
             current_cell.has_right = False
             other_cell.has_left = False
             if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
-                self.animate()
+                self.animate(break_wall_seconds)
             return i + 1, j
 
         if j < len(self.cells[i]) - 1 and other_cell == self.cells[i][j + 1]:
@@ -128,7 +129,7 @@ class Maze:
             if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
-                self.animate()
+                self.animate(break_wall_seconds)
             return i, j + 1
 
         if i > 0 and other_cell == self.cells[i - 1][j]:
@@ -137,7 +138,7 @@ class Maze:
             if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
-                self.animate()
+                self.animate(break_wall_seconds)
             return i - 1, j
 
         if j > 0 and other_cell == self.cells[i][j - 1]:
@@ -146,8 +147,59 @@ class Maze:
             if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
-                self.animate()
+                self.animate(break_wall_seconds)
             return i, j - 1
 
     def solve(self):
-        pass
+        return self._solve_r()
+
+    def _solve_r(self, i=0, j=0):
+        solve_speed_seconds = 0.1
+        if self.win:
+            self.animate(solve_speed_seconds)
+        self.cells[i][j].visited = True
+        if self.cells[i][j] == self.cells[-1][-1]:
+            return True
+
+        to_visit = []
+        for _ in range(4):
+            if (i > 0 and not self.cells[i - 1][j].visited
+                    and not self.cells[i][j].has_left):
+                to_visit.append((i - 1, j))
+
+            if (j > 0 and not self.cells[i][j - 1].visited
+                    and not self.cells[i][j].has_top):
+                to_visit.append((i, j - 1))
+
+            if (i < len(self.cells) - 1 and not self.cells[i + 1][j].visited
+                    and not self.cells[i][j].has_right):
+                to_visit.append((i + 1, j))
+
+            if (j < len(self.cells[i]) - 1 and not self.cells[i][j + 1].visited
+                    and not self.cells[i][j].has_bottom):
+                to_visit.append((i, j + 1))
+
+            if not to_visit:
+                return False
+            elif len(to_visit) == 1:
+                rand = 0
+            else:
+                rand = random.randrange(len(to_visit))
+
+            rand_coords = to_visit[rand]
+            if self.win:
+                self.win.draw_move(
+                    self.cells[i][j],
+                    self.cells[rand_coords[0]][rand_coords[1]]
+                )
+            correct_cell = self._solve_r(rand_coords[0], rand_coords[1])
+            if correct_cell:
+                return True
+            if self.win:
+                self.win.draw_move(
+                    self.cells[i][j],
+                    self.cells[rand_coords[0]][rand_coords[1]],
+                    undo=True
+                )
+
+        return False

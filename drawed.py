@@ -80,7 +80,7 @@ class Cell:
 
     def draw_move(self, canvas: Canvas, to_cell, undo=False):
         if undo:
-            fill = "gray"
+            fill = "blue"
         else:
             fill = "red"
 
