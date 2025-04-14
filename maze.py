@@ -24,6 +24,9 @@ class Maze:
         self.cell_size_y = cell_size_y
         self.win = win
         self.abandoned_cells = []
+        self.solve_speed_seconds = 0
+        self.break_wall_seconds = 0
+        self.create_speed_seconds = 0
         if seed:
             random.seed(1, version=2)
         self.create_cells()
@@ -44,7 +47,7 @@ class Maze:
                 cells.append(cell)
                 if self.win:
                     self.win.draw_cell(cell)
-                    self.animate()  # 0.001)
+                    self.animate(self.create_speed_seconds)
                 y += self.cell_size_y
             x += self.cell_size_x
             self.cells.append(cells)
@@ -111,14 +114,13 @@ class Maze:
             self._break_walls_r(new_i, new_j, depth + 1)
 
     def _break_cell_wall(self, current_cell: Cell, other_cell: Cell, i, j):
-        break_wall_seconds = 0.04
         if i < len(self.cells) - 1 and other_cell == self.cells[i + 1][j]:
             current_cell.has_right = False
             other_cell.has_left = False
             if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
-                self.animate()  # break_wall_seconds)
+                self.animate(self.break_wall_seconds)
             return i + 1, j
 
         if j < len(self.cells[i]) - 1 and other_cell == self.cells[i][j + 1]:
@@ -127,7 +129,7 @@ class Maze:
             if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
-                self.animate()  # break_wall_seconds)
+                self.animate(self.break_wall_seconds)
             return i, j + 1
 
         if i > 0 and other_cell == self.cells[i - 1][j]:
@@ -136,7 +138,7 @@ class Maze:
             if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
-                self.animate()  # break_wall_seconds)
+                self.animate(self.break_wall_seconds)
             return i - 1, j
 
         if j > 0 and other_cell == self.cells[i][j - 1]:
@@ -145,22 +147,19 @@ class Maze:
             if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
-                self.animate()  # break_wall_seconds)
+                self.animate(self.break_wall_seconds)
             return i, j - 1
 
     def solve(self):
         return self._solve_r()
 
     def _solve_r(self, i=0, j=0, depth=0):
-        solve_speed_seconds = 0.1
         if self.cells[i][j] == self.cells[-1][-1]:
             self.cells[i][j].visited = True
             return True
         if depth > 800:
-            return self._solve_iteratively(i, j)
+            self._solve_iteratively(i, j)
 
-        if self.win:
-            self.animate()  # solve_speed_seconds)
         self.cells[i][j].visited = True
 
         to_visit = []
@@ -194,6 +193,7 @@ class Maze:
                     self.cells[i][j],
                     self.cells[rand_coords[0]][rand_coords[1]]
                 )
+                self.animate(self.solve_speed_seconds)
             correct_cell = self._solve_r(
                 rand_coords[0], rand_coords[1], depth + 1)
             if correct_cell:
@@ -204,33 +204,89 @@ class Maze:
                     self.cells[rand_coords[0]][rand_coords[1]],
                     undo=True
                 )
+                self.animate(self.solve_speed_seconds)
 
         return False
 
-    def _solve_iteratively(self, i, j):
+    def _solve_iteratively(self, i=0, j=0):
         to_visit = []
         to_visit.append((i, j))
+
+        history_stack = []
         while to_visit:
-            cell_coords = to_visit.pop()
-            cur_cell = self.cells[cell_coords[0]][cell_coords[1]]
+            new_push = False
+            i, j = to_visit.pop()
+            cur_cell = self.cells[i][j]
             cur_cell.visited = True
+            history_stack.append(cur_cell)
             if cur_cell == self.cells[-1][-1]:
+                if self.win:
+                    self.win.draw_move(
+                        history_stack[-2],
+                        cur_cell)
+                    self.animate(self.solve_speed_seconds)
                 return True
 
             if (i > 0 and not self.cells[i - 1][j].visited
                     and not self.cells[i][j].has_left):
                 to_visit.append((i - 1, j))
+                new_push = True
 
             if (j > 0 and not self.cells[i][j - 1].visited
                     and not self.cells[i][j].has_top):
                 to_visit.append((i, j - 1))
+                new_push = True
 
             if (i < len(self.cells) - 1 and not self.cells[i + 1][j].visited
                     and not self.cells[i][j].has_right):
                 to_visit.append((i + 1, j))
+                new_push = True
 
             if (j < len(self.cells[i]) - 1 and not self.cells[i][j + 1].visited
                     and not self.cells[i][j].has_bottom):
                 to_visit.append((i, j + 1))
+                new_push = True
+
+            if self.win and len(history_stack) > 1 and new_push:
+                prev_cell = history_stack[-2]
+                self.win.draw_move(
+                    cur_cell,
+                    prev_cell
+                )
+                self.animate(self.solve_speed_seconds)
+            if self.win and len(history_stack) > 1 and not new_push:
+                found = False
+                follow_cell = history_stack.pop()
+                self.win.draw_move(
+                    follow_cell,
+                    history_stack[-1],
+                    True)
+                self.animate(self.solve_speed_seconds)
+                if not to_visit:
+                    return False
+                next_i, next_j = to_visit[-1]
+
+                while not found:
+                    check_cell = history_stack.pop()
+                    if (check_cell == self.cells[next_i - 1][next_j]
+                            and not self.cells[next_i][next_j].has_left):
+                        found = True
+                    elif (check_cell == self.cells[next_i][next_j - 1]
+                            and not self.cells[next_i][next_j].has_top):
+                        found = True
+                    elif (check_cell == self.cells[next_i + 1][next_j]
+                            and not self.cells[next_i][next_j].has_right):
+                        found = True
+                    elif (check_cell == self.cells[next_i][next_j + 1]
+                            and not self.cells[next_i][next_j].has_bottom):
+                        found = True
+
+                    self.win.draw_move(
+                        follow_cell,
+                        check_cell,
+                        True)
+                    self.animate(self.solve_speed_seconds)
+                    follow_cell = check_cell
+                history_stack.append(check_cell)
 
         return False
