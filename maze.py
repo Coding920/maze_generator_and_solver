@@ -158,7 +158,7 @@ class Maze:
             self.cells[i][j].visited = True
             return True
         if depth > 800:
-            self._solve_iteratively(i, j)
+            return self._solve_iteratively(i, j)
 
         self.cells[i][j].visited = True
 
