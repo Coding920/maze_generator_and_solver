@@ -44,12 +44,12 @@ class Maze:
                 cells.append(cell)
                 if self.win:
                     self.win.draw_cell(cell)
-                    self.animate(0.001)
+                    self.animate()  # 0.001)
                 y += self.cell_size_y
             x += self.cell_size_x
             self.cells.append(cells)
 
-    def animate(self, sleep_seconds):
+    def animate(self, sleep_seconds=0):
         self.win.redraw()
         time.sleep(sleep_seconds)
 
@@ -61,6 +61,7 @@ class Maze:
                     coord[0], coord[1])
         self._break_entrance_and_exit()
         self._reset_visited()
+        self.abandoned_cells = []
 
     def _reset_visited(self):
         for cell_list in self.cells:
@@ -75,9 +76,10 @@ class Maze:
             self.win.draw_cell(self.cells[-1][-1])
 
     def _break_walls_r(self, i, j, depth=0):
-        deep_return = False
         if depth > 800:  # Don't let it recurse too deep
-            deep_return = True
+            self.abandoned_cells.append((i, j))
+            self.cells[i][j].visited = True
+            return
         self.cells[i][j].visited = True
 
         while True:
@@ -102,10 +104,6 @@ class Maze:
             else:
                 rand = random.randrange(len(to_visit))
 
-            if deep_return:
-                self.abandoned_cells.append((i, j))
-                return
-
             new_i, new_j = self._break_cell_wall(
                 self.cells[i][j],
                 self.cells[to_visit[rand][0]][to_visit[rand][1]], i, j)
@@ -120,7 +118,7 @@ class Maze:
             if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
-                self.animate(break_wall_seconds)
+                self.animate()  # break_wall_seconds)
             return i + 1, j
 
         if j < len(self.cells[i]) - 1 and other_cell == self.cells[i][j + 1]:
@@ -129,7 +127,7 @@ class Maze:
             if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
-                self.animate(break_wall_seconds)
+                self.animate()  # break_wall_seconds)
             return i, j + 1
 
         if i > 0 and other_cell == self.cells[i - 1][j]:
@@ -138,7 +136,7 @@ class Maze:
             if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
-                self.animate(break_wall_seconds)
+                self.animate()  # break_wall_seconds)
             return i - 1, j
 
         if j > 0 and other_cell == self.cells[i][j - 1]:
@@ -147,19 +145,23 @@ class Maze:
             if self.win:
                 self.win.draw_cell(current_cell)
                 self.win.draw_cell(other_cell)
-                self.animate(break_wall_seconds)
+                self.animate()  # break_wall_seconds)
             return i, j - 1
 
     def solve(self):
         return self._solve_r()
 
-    def _solve_r(self, i=0, j=0):
+    def _solve_r(self, i=0, j=0, depth=0):
         solve_speed_seconds = 0.1
-        if self.win:
-            self.animate(solve_speed_seconds)
-        self.cells[i][j].visited = True
         if self.cells[i][j] == self.cells[-1][-1]:
+            self.cells[i][j].visited = True
             return True
+        if depth > 800:
+            return self._solve_iteratively(i, j)
+
+        if self.win:
+            self.animate()  # solve_speed_seconds)
+        self.cells[i][j].visited = True
 
         to_visit = []
         for _ in range(4):
@@ -192,7 +194,8 @@ class Maze:
                     self.cells[i][j],
                     self.cells[rand_coords[0]][rand_coords[1]]
                 )
-            correct_cell = self._solve_r(rand_coords[0], rand_coords[1])
+            correct_cell = self._solve_r(
+                rand_coords[0], rand_coords[1], depth + 1)
             if correct_cell:
                 return True
             if self.win:
@@ -201,5 +204,33 @@ class Maze:
                     self.cells[rand_coords[0]][rand_coords[1]],
                     undo=True
                 )
+
+        return False
+
+    def _solve_iteratively(self, i, j):
+        to_visit = []
+        to_visit.append((i, j))
+        while to_visit:
+            cell_coords = to_visit.pop()
+            cur_cell = self.cells[cell_coords[0]][cell_coords[1]]
+            cur_cell.visited = True
+            if cur_cell == self.cells[-1][-1]:
+                return True
+
+            if (i > 0 and not self.cells[i - 1][j].visited
+                    and not self.cells[i][j].has_left):
+                to_visit.append((i - 1, j))
+
+            if (j > 0 and not self.cells[i][j - 1].visited
+                    and not self.cells[i][j].has_top):
+                to_visit.append((i, j - 1))
+
+            if (i < len(self.cells) - 1 and not self.cells[i + 1][j].visited
+                    and not self.cells[i][j].has_right):
+                to_visit.append((i + 1, j))
+
+            if (j < len(self.cells[i]) - 1 and not self.cells[i][j + 1].visited
+                    and not self.cells[i][j].has_bottom):
+                to_visit.append((i, j + 1))
 
         return False

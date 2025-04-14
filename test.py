@@ -88,6 +88,39 @@ class Test(unittest.TestCase):
                     not cell.visited
                 )
 
+    def test_solve(self):
+        m1 = Maze(0, 0, 100, 100, 10, 10)
+        m1.break_walls()
+        for row in m1.cells:
+            for cell in row:
+                self.assertTrue(
+                    m1.solve()
+                )
+
+        m1 = Maze(0, 0, 2, 2, 10, 10)
+        m1.break_walls()
+        for row in m1.cells:
+            for cell in row:
+                self.assertTrue(
+                    m1.solve()
+                )
+
+        m1 = Maze(0, 0, 100, 1, 10, 10)
+        m1.break_walls()
+        for row in m1.cells:
+            for cell in row:
+                self.assertTrue(
+                    m1.solve()
+                )
+
+        m1 = Maze(0, 0, 1, 100, 10, 10)
+        m1.break_walls()
+        for row in m1.cells:
+            for cell in row:
+                self.assertTrue(
+                    m1.solve()
+                )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
