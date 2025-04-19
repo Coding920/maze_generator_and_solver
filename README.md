@@ -1,6 +1,8 @@
 # Maze Generator and Solver
 
-This is a guided project from the Boot.dev curriculum.
+[Solved maze](./readme_images/solved.png)
+
+This is a guided project from the Boot.dev curriculum and coded soley by me. [Boot.dev](boot.dev)
 
 ## How to use
 
