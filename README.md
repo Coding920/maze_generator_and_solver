@@ -1,6 +1,6 @@
 # Maze Generator and Solver
 
-![Solved maze](./readme_images/solved.png){ width=50% }
+<img src="./readme_images/solved.png" width="40%">
 
 This is a guided project from the Boot.dev curriculum and coded soley by me. [Boot.dev](boot.dev)
 
